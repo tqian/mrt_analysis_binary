@@ -1,28 +1,35 @@
 ####################################
-# Created by Tianchen Qian, 2018/8/7
+# Created by Tianchen Qian, 2019/12/19
 #
 # In this code, the ordering of parameters is (alpha, beta),
 # where len(alpha) = q, and len(beta) = p.
 #
-# This estimator is the estimator in the binary outcome Biometrika paper.
-
+# This estimator is the estimator in the sample size calculation paper,
+# where the treatment indicator is always centered.
+#
+# This estimator assumes that the randomization probability does not depend on H_t,
+# therefore the inverse probability weighting is no longer needed and hence removed from this code.
+#
+# For derivation of the variance estimator, see
+# 2019.12.19 - asymptotic variance and small sample correction incorporating availability (modified EE with centered A everywhere)
+#
+# X (moderator) in the code corresponds to f(t) in the writeup;
+# Z (control variables) in the code corresponds to g(t) in the writeup.
 
 
 library(rootSolve) # for solver function multiroot()
 
 
-estimator_EMEE <- function(
+estimator_EMEE_alwaysCenterA <- function(
     dta,
     id_varname,
     decision_time_varname,
     treatment_varname,
     outcome_varname,
-    control_varname,
-    moderator_varname,
+    control_varname, # intercept will be automatically added
+    moderator_varname, # intercept will be automatically added
     rand_prob_varname,
     avail_varname = NULL,
-    rand_prob_tilde_varname = NULL, # \tilde{p}_t(1|H_t) in WCLS (variable name in the data set)
-    rand_prob_tilde = NULL,         # \tilde{p}_t(1|H_t) in WCLS (numeric number or vector)
     estimator_initial_value = NULL
 )
 {
@@ -30,6 +37,9 @@ estimator_EMEE <- function(
     ##
     ## This function estimates the moderated treatment effect for binary outcome,
     ## and provides variance estimate.
+    ##
+    ## In the estimating equation, the treatment indicator A is always centered, including in the blipping-down part.
+    ## This is for analytic derivation of the sample size fomrula.
     ##
     ## It incorporates two methods for small sample correction:
     ## 1) the usage of "Hat" matrix in the variance estimate (as in Mancl & DeRouen 2001)
@@ -49,12 +59,6 @@ estimator_EMEE <- function(
     ## rand_prob_varname.....variable name for randomization probability (a column in dta)
     ## avail_varname.........variable name for availability (a column in dta)
     ##                       default to NULL (available at all decision points)
-    ## rand_prob_tilde_varname.....variable name for \tilde{p}_t(1|H_t) (a column in dta)
-    ##                             this is the arbitrary weight used in WCLS
-    ##                             default to NULL (in which case \tilde{p}_t(1|H_t) is set to 0.5)
-    ## rand_prob_tilde.............a numeric vector of the same length as dta
-    ##                             this is another way to specify \tilde{p}_t(1|H_t)
-    ##                             default to NULL (in which case \tilde{p}_t(1|H_t) is set to 0.5)
     ## estimator_initial_value.....initial value for the estimator in the root finding algorithm
     ##                             length is len(control_varname) + len(moderator_varname) + 2
     ##                             default to NULL (in which case the intial value = all 0's)
@@ -99,23 +103,6 @@ estimator_EMEE <- function(
     Xdm <- as.matrix( cbind( rep(1, nrow(dta)), dta[, moderator_varname] ) ) # X (moderator) design matrix, intercept added
     Zdm <- as.matrix( cbind( rep(1, nrow(dta)), dta[, control_varname] ) ) # Z (control) design matrix, intercept added
     
-    if (is.null(rand_prob_tilde_varname) & is.null(rand_prob_tilde)) {
-        p_t_tilde <- rep(0.5, nrow(dta))
-    } else if (is.null(rand_prob_tilde_varname)) {
-        if (length(rand_prob_tilde) == 1) {
-            p_t_tilde <- rep(rand_prob_tilde, total_person_decisionpoint)
-        } else if (length(rand_prob_tilde) == total_person_decisionpoint) {
-            p_t_tilde <- rand_prob_tilde
-        } else {
-            stop("rand_prob_tilde is of incorrect length.")
-        }
-    } else {
-        p_t_tilde <- dta[, rand_prob_tilde_varname]
-    }
-    cA_tilde <- A - p_t_tilde
-    
-    WCLS_weight <- ifelse(A, p_t_tilde / p_t, (1 - p_t_tilde) / (1 - p_t))
-    
     p <- length(moderator_varname) + 1 # dimension of beta
     q <- length(control_varname) + 1 # dimension of alpha
     
@@ -129,17 +116,16 @@ estimator_EMEE <- function(
         beta <- as.matrix(theta[(q+1):(q+p)])
         
         exp_Zdm_alpha <- exp(Zdm %*% alpha)
-        exp_AXdm_beta <- exp(A * (Xdm %*% beta))
+        exp_negcAXdm_beta <- exp(- cA * (Xdm %*% beta))
         
-        residual <- Y - exp_Zdm_alpha * exp_AXdm_beta
-        weight <- exp_AXdm_beta^(-1)
+        residual <- exp_negcAXdm_beta * Y - exp_Zdm_alpha
 
         ef <- rep(NA, length(theta)) # value of estimating function
         for (i in 1:q) {
-            ef[i] <- sum( weight * residual * avail * WCLS_weight * Zdm[, i])
+            ef[i] <- sum( residual * avail * Zdm[, i])
         }
         for (i in 1:p) {
-            ef[q + i] <- sum( weight * residual * avail * WCLS_weight * cA_tilde * Xdm[, i])
+            ef[q + i] <- sum( residual * avail * cA * Xdm[, i])
         }
         
         ef <- ef / sample_size
@@ -155,7 +141,7 @@ estimator_EMEE <- function(
             multiroot(estimating_equation, estimator_initial_value)
         },
         error = function(cond) {
-            message("\nCatched error in multiroot inside weighted_centered_least_square():")
+            message("\nCatched error in multiroot inside estimator_EMEE_alwaysCenterA():")
             message(cond)
             return(list(root = rep(NaN, p + q), msg = cond,
                         f.root = rep(NaN, p + q)))
@@ -165,7 +151,7 @@ estimator_EMEE <- function(
     alpha_hat <- as.vector(estimator$alpha)
     beta_hat <- as.vector(estimator$beta)
     
-    ### 3. asymptotic variance ###
+    ### 3. asymptotic variance and small sample correction ###
     
     ### 3.1 Compute M_n matrix (M_n is the empirical expectation of the derivative of the estimating function) ###
     
@@ -173,62 +159,91 @@ estimator_EMEE <- function(
     # Mn_summand is \frac{\partial D^{(t),T}}{\partial \theta^T} r^(t) + D^{(t),T} \frac{\partial r^(t)}{\partial \theta^T}
     # See note 2018.08.06 about small sample correction
     
-    r_term_collected <- rep(NA, total_person_decisionpoint)
-    D_term_collected <- matrix(NA, nrow = p+q, ncol = total_person_decisionpoint)
-    partialr_partialtheta_collected <- matrix(NA, nrow = total_person_decisionpoint, ncol = p+q)
-    
     for (it in 1:total_person_decisionpoint) {
+        
         # this is to make R code consistent whether X_it, Z_it contains more entries or is just the intercept.        
         if (p == 1) {
-            Xbeta <- Xdm[it, ] * beta_hat
+            Xbeta_it <- Xdm[it, ] * beta_hat # a scalar
         } else {
-            Xbeta <- as.numeric(Xdm[it, ] %*% beta_hat)
+            Xbeta_it <- as.numeric(Xdm[it, ] %*% beta_hat) # a scalar
         }
         if (q == 1) {
-            Zalpha <- Zdm[it, ] * alpha_hat
+            Zalpha_it <- Zdm[it, ] * alpha_hat # a scalar
         } else {
-            Zalpha <- as.numeric(Zdm[it, ] %*% alpha_hat)
+            Zalpha_it <- as.numeric(Zdm[it, ] %*% alpha_hat) # a scalar
         }
         
-        pre_multiplier <- exp(- A[it] * Xbeta) * WCLS_weight[it]
+        Zdm_it <- as.numeric(Zdm[it, ])
+        Xdm_it <- as.numeric(Xdm[it, ])
         
-        # partialD_partialtheta = \frac{\partial D^{(t),T}}{\partial \theta^T}, matrix of dim (p+q)*(p+q)
-        partialD_partialtheta <- matrix(NA, nrow = p + q, ncol = p + q)
-        partialD_partialtheta[1:q, 1:q] <- 0
-        partialD_partialtheta[1:q, (q+1):(q+p)] <- - pre_multiplier * A[it] * (Zdm[it, ] %o% Xdm[it, ])
-        partialD_partialtheta[(q+1):(q+p), 1:q] <- 0
-        partialD_partialtheta[(q+1):(q+p), (q+1):(q+p)] <- - pre_multiplier * A[it] * cA_tilde[it] * (Xdm[it, ] %o% Xdm[it, ])
+        stopifnot(class(Zalpha_it) == "numeric")
+        stopifnot(class(Zdm_it) == "numeric")
+        stopifnot(length(Zdm_it) == q)
         
-        # r_term = r^(t) (scalar)
-        r_term <- (Y[it] - exp(Zalpha + A[it] * Xbeta)) * avail[it]
-        r_term_collected[it] <- r_term
+        stopifnot(class(Xbeta_it) == "numeric")
+        stopifnot(class(Xdm_it) == "numeric")
+        stopifnot(length(Xdm_it) == p)
         
-        # D_term = D^{(t),T} (dim = (p+q) * 1)
-        D_term <- pre_multiplier * c(Zdm[it, ], cA_tilde[it] * Xdm[it, ])
-        D_term_collected[, it] <- D_term
-        
-        # partialr_partialtheta = \frac{\partial r^(t)}{\partial \theta^T}
-        partialr_partialtheta <- - exp(Zalpha + A[it] * Xbeta) * c(Zdm[it, ], A[it] * Xdm[it, ]) * avail[it]
-        partialr_partialtheta_collected[it, ] <- partialr_partialtheta
-        
-        Mn_summand[it, , ] <- partialD_partialtheta * r_term + D_term %o% partialr_partialtheta
+        Mn_summand[it, 1:q, 1:q] <- - avail[it] * exp(Zalpha_it) * (Zdm_it %o% Zdm_it)
+        Mn_summand[it, 1:q, (q+1):(q+p)] <- - avail[it] * exp(- cA[it] * Xbeta_it) * Y[it] * cA[it] * (Zdm_it %o% Xdm_it)
+        Mn_summand[it, (q+1):(q+p), 1:q] <- - avail[it] * exp(Zalpha_it) * cA[it] * (Xdm_it %o% Zdm_it)
+        Mn_summand[it, (q+1):(q+p), (q+1):(q+p)] <- - avail[it] * exp(- cA[it] * Xbeta_it) * Y[it] * cA[it]^2 * (Xdm_it %o% Xdm_it)
     }
     Mn <- apply(Mn_summand, c(2,3), sum) / sample_size
     Mn_inv <- solve(Mn)
     
-    ### 3.2 Compute \Sigma_n matrix (\Sigma_n is the empirical variance of the estimating function) ###
+    ### 3.2 Compute \Sigma_n matrix and \tilde{\Sigma}_n matrix ###
     
     Sigman_summand <- array(NA, dim = c(sample_size, p+q, p+q))
-    # Sigman_summand is  \sum_{t=1}^T ( D^{(t),T} r^(t) )^{\otimes 2}
-    # See note 2018.08.06 about small sample correction
+    Sigman_tilde_summand <- array(NA, dim = c(sample_size, p+q, p+q))
     
     person_first_index <- c(find_change_location(dta[, id_varname]), total_person_decisionpoint + 1)
     
     for (i in 1:sample_size) {
-        D_term_i <- D_term_collected[, person_first_index[i] : (person_first_index[i+1] - 1)]
-        r_term_i <- matrix(r_term_collected[person_first_index[i] : (person_first_index[i+1] - 1)], ncol = 1)
         
-        Sigman_summand[i, , ] <- D_term_i %*% r_term_i %*% t(r_term_i) %*% t(D_term_i)
+        T_i <- person_first_index[i+1] - person_first_index[i] # number of time points for individual i
+        index_i <- person_first_index[i] : (person_first_index[i+1] - 1) # row number of individual i's data in dta
+        
+        Zdm_i <- Zdm[index_i, ] # each row in Zdm_i corresponds to a time point
+        Xdm_i <- Xdm[index_i, ] # each row in Xdm_i corresponds to a time point
+        cA_i <- cA[index_i]     # each entry in cA_i corresponds to a time point
+        Y_i <- Y[index_i]
+        
+        if (p == 1) {
+            Xdm_i <- matrix(Xdm_i, ncol = 1)
+        }
+        if (q == 1) {
+            Zdm_i <- matrix(Zdm_i, ncol = 1)
+        }
+        
+        stopifnot(class(Zdm_i) == "matrix")
+        stopifnot(class(Xdm_i) == "matrix")
+        stopifnot(nrow(Zdm_i) == T_i & ncol(Zdm_i) == q)
+        stopifnot(nrow(Xdm_i) == T_i & ncol(Xdm_i) == p)
+        
+        D_i <- cbind(Zdm_i, cA_i * Xdm_i)
+        r_i <- matrix(exp(- cA_i * Xdm_i %*% beta_hat) * Y_i - exp(Zdm_i %*% alpha_hat), nrow = T_i, ncol = 1)
+        I_i <- diag(avail[index_i])
+        
+        stopifnot(nrow(D_i) == T_i & ncol(D_i) == (q+p))
+        stopifnot(nrow(r_i) == T_i & ncol(r_i) == 1)
+        stopifnot(nrow(I_i) == T_i & ncol(I_i) == T_i)
+        
+        Sigman_summand[i, , ] <- t(D_i) %*% I_i %*% r_i %*% t(r_i) %*% t(I_i) %*% D_i
+        
+        # deriv_r_i is \partial r(\theta) / \partial \theta^T for the i-th individual
+        deriv_r_i <- cbind( - as.numeric(exp(Zdm_i %*% alpha_hat)) * Zdm_i,
+                            - as.numeric(exp(- cA_i * Xdm_i %*% beta_hat)) * Y_i * cA_i * Xdm_i)
+        stopifnot(nrow(deriv_r_i) == T_i & ncol(deriv_r_i) == (q+p))
+        
+        H_ii <- deriv_r_i %*% Mn_inv %*% t(D_i) / sample_size
+        stopifnot(nrow(H_ii) == T_i & ncol(H_ii) == T_i)
+        
+        I_minus_H_i <- diag(1, nrow = T_i, ncol = T_i)
+        I_minus_H_i_inv <- solve(I_minus_H_i - H_ii)
+        
+        Sigman_tilde_summand[i, , ] <- t(D_i) %*% I_i %*% I_minus_H_i_inv %*% r_i %*% 
+            t(r_i) %*% t(I_minus_H_i_inv) %*% t(I_i) %*% D_i
     }
     Sigman <- apply(Sigman_summand, c(2,3), sum) / sample_size
     
@@ -236,27 +251,13 @@ estimator_EMEE <- function(
     alpha_se <- sqrt(diag(varcov)[1:q])
     beta_se <- sqrt(diag(varcov)[(q+1):(q+p)])
     
-    
-    ### 4. small sample correction ###
-    
-    Sigman_tilde <- 0
-    for (i in 1:sample_size) {
-        D_term_i <- D_term_collected[, person_first_index[i] : (person_first_index[i+1] - 1)]
-        r_term_i <- matrix(r_term_collected[person_first_index[i] : (person_first_index[i+1] - 1)], ncol = 1)
-        partialr_partialtheta_i <- partialr_partialtheta_collected[person_first_index[i] : (person_first_index[i+1] - 1), ]
-        H_ii <- partialr_partialtheta_i %*% Mn_inv %*% D_term_i / sample_size
-        Ii_minus_Hii_inv <- solve(diag(nrow(H_ii)) - H_ii)
-        
-        Sigman_tilde <- Sigman_tilde + D_term_i %*% Ii_minus_Hii_inv %*% r_term_i %*% t(r_term_i) %*% t(Ii_minus_Hii_inv) %*% t(D_term_i)
-    }
-    Sigman_tilde <- Sigman_tilde / sample_size
+    Sigman_tilde <- apply(Sigman_tilde_summand, c(2,3), sum) / sample_size
     
     varcov_adjusted <- Mn_inv %*% Sigman_tilde %*% t(Mn_inv) / sample_size
     alpha_se_adjusted <- sqrt(diag(varcov_adjusted)[1:q])
     beta_se_adjusted <- sqrt(diag(varcov_adjusted)[(q+1):(q+p)])
     
-    
-    ### 6. return the result with variable names ###
+    ### 4. return the result with variable names ###
     
     names(alpha_hat) <- names(alpha_se) <- names(alpha_se_adjusted) <- Znames
     names(beta_hat) <- names(beta_se) <- names(beta_se_adjusted) <- Xnames
