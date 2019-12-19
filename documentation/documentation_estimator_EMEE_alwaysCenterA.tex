@@ -1,0 +1,200 @@
+%% LyX 2.3.3 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=3cm,bmargin=3cm,lmargin=3cm,rmargin=3cm}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{babel}
+\begin{document}
+\title{Asymptotic variance and small sample correction incorporating availability\\
+For estimator\_EMEE\_alwaysCenterA}
+\author{Tianchen Qian}
+\date{2019.12.19}
+\maketitle
+
+\section{Estimating equations}
+
+Data is $(X_{1},A_{1},Y_{2},\cdots,X_{T},A_{T},Y_{T+1})$. History
+$H_{t}:=(\bar{Y}_{t},\bar{X}_{t},\bar{A}_{t-1})=(X_{1},A_{1},Y_{2},\ldots X_{t-1},A_{t-1},Y_{t-1},X_{t})$.
+Availability at the $t$-th decision point is $I_{t}$. The randomization
+probability is $p_{t}$ which does not depend on $H_{t}$.
+
+The marginal excursion effect is defined as
+\begin{align*}
+\text{MEE}(t) & =\log\frac{E\{E(Y_{t+1}\mid H_{t},A_{t}=1,I_{t}=1)\mid I_{t}=1\}}{E\{E(Y_{t+1}\mid H_{t},A_{t}=0,I_{t}=1)\mid I_{t}=1\}}\\
+ & =\log\frac{E(Y_{t+1}\mid A_{t}=1,I_{t}=1)}{E(Y_{t+1}\mid A_{t}=0,I_{t}=1)}.
+\end{align*}
+(The second equality holds in this setting because $p_{t}$ does not
+depend on $H_{t}$.) We assume that 
+\[
+\text{MEE}(t)=f(t)^{T}\beta^{*}
+\]
+for some unknown $p$-dimensional $\beta^{*}$. The estimating equation
+is
+
+\[
+\mathbb{P}_{n}\sum_{t=1}^{T}I_{t}\left\{ e^{-(A_{t}-p_{t})f(t)^{T}\beta}Y_{t+1}-e^{g(t)^{T}\alpha}\right\} \begin{bmatrix}g(t)\\
+(A_{t}-p_{t})f(t)
+\end{bmatrix}=0,
+\]
+where $g(t)$ is a $q$-dimensional feature vector of $t$ such that
+$p_{t}f(t)$ is in the linear span of $g(t)$. So we have $\dim(\alpha)=q$,
+$\dim(\beta)=p$.
+
+Define $D=\begin{bmatrix}D_{1}^{T}\\
+D_{2}^{T}\\
+\vdots\\
+D_{T}^{T}
+\end{bmatrix}$ a $T\times(p+q)$ matrix, where $D_{t}=\begin{bmatrix}g(t)\\
+(A_{t}-p_{t})f(t)
+\end{bmatrix}$ is $(p+q)\times1$. Define $r(\alpha,\beta)=(r_{1},\ldots,r_{T})^{T}$
+a $T\times1$ (column) vector, where $r_{t}(\alpha,\beta)=e^{-(A_{t}-p_{t})f(t)^{T}\beta}Y_{t+1}-e^{g(t)^{T}\alpha}$.
+Let $I$ be the diagonal matrices with the $t$-th diagonal entry
+being $I_{t}$. The above estimating equation can be rewritten as
+$\mathbb{P}_{n}D^{T}Ir(\alpha,\beta)=0$.
+
+Notation convention: For a column vector $f=(f_{1},\ldots,f_{k})^{T}$,
+its derivative is defined as
+\[
+\frac{\partial f}{\partial\theta^{T}}=\begin{bmatrix}\frac{\partial f_{1}}{\partial\theta_{1}} & \cdots & \frac{\partial f_{1}}{\partial\theta_{k}}\\
+\vdots &  & \vdots\\
+\frac{\partial f_{k}}{\partial\theta_{1}} & \cdots & \frac{\partial f_{k}}{\partial\theta_{k}}
+\end{bmatrix},
+\]
+and for a scalar $r$, its derivative is defined as $\frac{\partial r}{\partial\theta}=(\frac{\partial r}{\partial\theta_{1}},\ldots,\frac{\partial r}{\partial\theta_{k}})^{T}$
+(column vector), and $\frac{\partial r}{\partial\theta^{T}}=(\frac{\partial r}{\partial\theta_{1}},\ldots,\frac{\partial r}{\partial\theta_{k}})$
+(row vector).
+
+\section{Asymptotic variance}
+
+Let $\theta:=(\alpha,\beta)$. Suppose $(\alpha^{*},\beta^{*})$ satisfies
+the population version of the estimating equation, i.e., $E_{\text{truth}}\{D^{T}Ir(\alpha^{*},\beta^{*})\}=0$
+($\beta^{*}$is the $\beta^{*}$ in $\text{MEE}(t)$, which is shown
+in Sec 1.2). Then by Theorem 5.21 in vdV, under regularity conditions
+we have
+\begin{equation}
+\sqrt{n}\left(\begin{bmatrix}\hat{\alpha}\\
+\hat{\beta}
+\end{bmatrix}-\begin{bmatrix}\alpha^{*}\\
+\beta^{*}
+\end{bmatrix}\right)=-V_{\theta^{*}}^{-1}\frac{1}{\sqrt{n}}\sum_{i=1}^{n}\psi_{\theta^{*}}(\text{Data}_{i})+o_{P}(1),\label{eq:vdV}
+\end{equation}
+where $\theta^{*}=(\alpha^{*},\beta^{*})$, $\psi_{\theta}=D^{T}Ir(\alpha,\beta)$,
+$V_{\theta^{*}}=E_{\text{truth}}\left(\frac{\partial\psi_{\theta}}{\partial\theta^{T}}\mid_{\theta^{*}}\right)$.
+This implies that the asymptotic variance of $(\hat{\alpha},\hat{\beta})$
+is
+\begin{align*}
+\text{Var}\left(\begin{bmatrix}\hat{\alpha}\\
+\hat{\beta}
+\end{bmatrix}\right) & \approx\frac{1}{n}V_{\theta^{*}}^{-1}E_{\text{truth}}(\psi_{\theta^{*}}\psi_{\theta^{*}}^{T})(V_{\theta^{*}}^{-1})^{T}.\\
+ & =\frac{1}{n}V_{\theta^{*}}^{-1}E_{\text{truth}}\{D^{T}Ir(\alpha^{*},\beta^{*})r(\alpha^{*},\beta^{*})^{T}ID\}(V_{\theta^{*}}^{-1})^{T}\\
+ & =\frac{1}{n}M^{-1}\Sigma(M^{-1})^{T},
+\end{align*}
+where
+\begin{align*}
+M & =V_{\theta^{*}},\\
+\Sigma & =E_{\text{truth}}\{D^{T}Ir(\alpha^{*},\beta^{*})r(\alpha^{*},\beta^{*})^{T}ID\}.
+\end{align*}
+An estimator of the \textbf{asymptotic variance} is $\frac{1}{n}M_{n}^{-1}\Sigma_{n}(M_{n}^{-1})^{T}$,
+where 
+\begin{align*}
+\Sigma_{n} & =\mathbb{P}_{n}\{D^{T}Ir(\hat{\theta})r(\hat{\theta})^{T}ID\},\\
+M_{n} & =\mathbb{P}_{n}D^{T}I\frac{\partial r(\hat{\theta})}{\partial\theta^{T}}.
+\end{align*}
+
+
+\section{Small sample correction with hat matrix}
+
+For small sample correction as in Mancl and DeRouen (2001), we replace
+$\Sigma_{n}$ in the variance estimator by $\tilde{\Sigma}_{n}$:
+\[
+\tilde{\Sigma}_{n}=\frac{1}{n}\sum_{i=1}^{n}\left[D_{i}^{T}I_{i}\left\{ Id_{i}-H_{ii}(\hat{\theta})\right\} ^{-1}r_{i}(\hat{\theta})r_{i}(\hat{\theta})^{T}\left\{ Id_{i}-H_{ii}(\hat{\theta})\right\} ^{-1,T}I_{i}D_{i}\right],
+\]
+where $Id_{i}$ is the identity matrix (the same dimension as $H_{ii}(\hat{\theta})$),
+and
+\[
+H_{ii}(\theta)=\frac{1}{n}\frac{\partial r_{i}(\theta)}{\partial\theta^{T}}M_{n}^{-1}D_{i}^{T}.
+\]
+Derivation of this small sample correction formula is in Section 5
+of ``2019.02.06 - asymptotic variance and small sample correction
+incorporating availability (new).pdf''.
+
+\section{Asymptotic variance and small sample correction, computing out each
+terms in order to program it in R}
+
+Some of the sections are copied from ``2019.12.18 - derivation with
+only time in covariates.lyx''.
+
+\subsection{Derivative $\frac{\partial r(\theta)}{\partial\theta^{T}}$}
+
+Recall that $r_{t}(\alpha,\beta)=e^{-(A_{t}-p_{t})f(t)^{T}\beta}Y_{t+1}-e^{g(t)^{T}\alpha}$.
+We have 
+\begin{align*}
+\frac{\partial r_{t}}{\partial\theta^{T}} & =\left[\frac{\partial r_{t}}{\partial\alpha^{T}},\frac{\partial r_{t}}{\partial\beta^{T}}\right]\\
+ & =\left[-e^{g(t)^{T}\alpha}g(t)^{T},-e^{-(A_{t}-p_{t})f(t)^{T}\beta}Y_{t+1}(A_{t}-p_{t})f(t)^{T}\right].
+\end{align*}
+So
+\[
+\frac{\partial r(\theta)}{\partial\theta^{T}}=\begin{bmatrix}-e^{g(1)^{T}\alpha}g(1)^{T} & -e^{-(A_{1}-p_{1})f(1)^{T}\beta}Y_{2}(A_{1}-p_{1})f(1)^{T}\\
+\vdots & \vdots\\
+-e^{g(T)^{T}\alpha}g(T)^{T} & -e^{-(A_{T}-p_{T})f(T)^{T}\beta}Y_{T+1}(A_{T}-p_{T})f(T)^{T}
+\end{bmatrix}.
+\]
+
+
+\subsection{Analytic calculation of $M_{n}$}
+
+We have
+\begin{align*}
+M_{n} & =\mathbb{P}_{n}D^{T}I\frac{\partial r(\hat{\theta})}{\partial\theta^{T}}.\\
+ & =\mathbb{P}_{n}\begin{bmatrix}g(1) & \cdots & g(T)\\
+(A_{1}-p_{1})f(1) & \cdots & (A_{T}-p_{T})f(T)
+\end{bmatrix}_{(q+p)\times T}\begin{bmatrix}I_{1} & 0 & 0\\
+0 & \cdots & 0\\
+0 & 0 & I_{T}
+\end{bmatrix}_{T\times T}\\
+ & \times\begin{bmatrix}-e^{g(1)^{T}\hat{\alpha}}g(1)^{T} & -e^{-(A_{1}-p_{1})f(1)^{T}\hat{\beta}}Y_{2}(A_{1}-p_{1})f(1)^{T}\\
+\vdots & \vdots\\
+-e^{g(T)^{T}\hat{\alpha}}g(T)^{T} & -e^{-(A_{T}-p_{T})f(T)^{T}\hat{\beta}}Y_{T+1}(A_{T}-p_{T})f(T)^{T}
+\end{bmatrix}_{T\times(q+p)}\\
+ & =\mathbb{P}_{n}\sum_{t=1}^{T}I_{t}\begin{bmatrix}g(t)\\
+(A_{t}-p_{t})f(t)
+\end{bmatrix}\left[-e^{g(t)^{T}\hat{\alpha}}g(t)^{T},-e^{-(A_{t}-p_{t})f(t)^{T}\hat{\beta}}Y_{t+1}(A_{t}-p_{t})f(t)^{T}\right]\\
+ & =-\mathbb{P}_{n}\sum_{t=1}^{T}I_{t}\begin{bmatrix}e^{g(t)^{T}\hat{\alpha}}g(t)g(t)^{T} & e^{-(A_{t}-p_{t})f(t)^{T}\hat{\beta}}Y_{t+1}(A_{t}-p_{t})g(t)f(t)^{T}\\
+e^{g(t)^{T}\hat{\alpha}}(A_{t}-p_{t})f(t)g(t)^{T} & e^{-(A_{t}-p_{t})f(t)^{T}\hat{\beta}}Y_{t+1}(A_{t}-p_{t})^{2}f(t)f(t)^{T}
+\end{bmatrix}.
+\end{align*}
+
+
+\subsection{Analytic calculation of $\Sigma_{n}$}
+
+\begin{align*}
+\Sigma_{n} & =\mathbb{P}_{n}\{D^{T}Ir(\hat{\alpha},\hat{\beta})r(\hat{\alpha},\hat{\beta})^{T}ID\}\\
+ & =\mathbb{P}_{n}\left\{ \left(\sum_{t=1}^{T}D_{t}I_{t}r_{t}(\hat{\alpha},\hat{\beta})\right)\left(\sum_{s=1}^{T}D_{s}I_{s}r_{s}(\hat{\alpha},\hat{\beta})\right)^{T}\right\} \\
+ & =\mathbb{P}_{n}\left\{ \sum_{t=1}^{T}\sum_{s=1}^{T}I_{t}I_{s}r_{t}(\hat{\alpha},\hat{\beta})r_{s}(\hat{\alpha},\hat{\beta})D_{t}D_{s}^{T}\right\} \\
+ & =\mathbb{P}_{n}\left\{ \sum_{t=1}^{T}\sum_{s=1}^{T}I_{t}I_{s}r_{t}(\hat{\alpha},\hat{\beta})r_{s}(\hat{\alpha},\hat{\beta})\begin{bmatrix}g(t)g(t)^{T} & (A_{s}-p_{s})g(t)f(s)^{T}\\
+(A_{t}-p_{t})f(t)g(s)^{T} & (A_{t}-p_{t})(A_{s}-p_{s})f(t)f(s)^{T}
+\end{bmatrix}\right\} 
+\end{align*}
+
+
+\subsection{Analytic calculation of $\tilde{\Sigma}_{n}$}
+
+We have
+\[
+H_{ii}(\hat{\theta})=\frac{1}{n}\frac{\partial r_{i}(\hat{\theta})}{\partial\theta^{T}}M_{n}^{-1}D_{i}^{T}
+\]
+where each term are explicitly written out as above.
+
+Hence, we have
+\[
+\tilde{\Sigma}_{n}=\frac{1}{n}\sum_{i=1}^{n}\left[D_{i}^{T}I_{i}\left\{ Id_{i}-H_{ii}(\hat{\theta})\right\} ^{-1}r_{i}(\hat{\theta})r_{i}(\hat{\theta})^{T}\left\{ Id_{i}-H_{ii}(\hat{\theta})\right\} ^{-1,T}I_{i}D_{i}\right].
+\]
+
+\end{document}

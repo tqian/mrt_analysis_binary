@@ -1,0 +1,603 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\begin_modules
+theorems-ams
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing onehalf
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 3cm
+\topmargin 3cm
+\rightmargin 3cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Asymptotic variance and small sample correction incorporating availability
+\begin_inset Newline newline
+\end_inset
+
+For estimator_EMEE_alwaysCenterA
+\end_layout
+
+\begin_layout Author
+Tianchen Qian
+\end_layout
+
+\begin_layout Date
+2019.12.19
+\end_layout
+
+\begin_layout Section
+Estimating equations
+\end_layout
+
+\begin_layout Standard
+Data is 
+\begin_inset Formula $(X_{1},A_{1},Y_{2},\cdots,X_{T},A_{T},Y_{T+1})$
+\end_inset
+
+.
+ History 
+\begin_inset Formula $H_{t}:=(\bar{Y}_{t},\bar{X}_{t},\bar{A}_{t-1})=(X_{1},A_{1},Y_{2},\ldots X_{t-1},A_{t-1},Y_{t-1},X_{t})$
+\end_inset
+
+.
+ Availability at the 
+\begin_inset Formula $t$
+\end_inset
+
+-th decision point is 
+\begin_inset Formula $I_{t}$
+\end_inset
+
+.
+ The randomization probability is 
+\begin_inset Formula $p_{t}$
+\end_inset
+
+ which does not depend on 
+\begin_inset Formula $H_{t}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The marginal excursion effect is defined as
+\begin_inset Formula 
+\begin{align*}
+\text{MEE}(t) & =\log\frac{E\{E(Y_{t+1}\mid H_{t},A_{t}=1,I_{t}=1)\mid I_{t}=1\}}{E\{E(Y_{t+1}\mid H_{t},A_{t}=0,I_{t}=1)\mid I_{t}=1\}}\\
+ & =\log\frac{E(Y_{t+1}\mid A_{t}=1,I_{t}=1)}{E(Y_{t+1}\mid A_{t}=0,I_{t}=1)}.
+\end{align*}
+
+\end_inset
+
+(The second equality holds in this setting because 
+\begin_inset Formula $p_{t}$
+\end_inset
+
+ does not depend on 
+\begin_inset Formula $H_{t}$
+\end_inset
+
+.) We assume that 
+\begin_inset Formula 
+\[
+\text{MEE}(t)=f(t)^{T}\beta^{*}
+\]
+
+\end_inset
+
+for some unknown 
+\begin_inset Formula $p$
+\end_inset
+
+-dimensional 
+\begin_inset Formula $\beta^{*}$
+\end_inset
+
+.
+ The estimating equation is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbb{P}_{n}\sum_{t=1}^{T}I_{t}\left\{ e^{-(A_{t}-p_{t})f(t)^{T}\beta}Y_{t+1}-e^{g(t)^{T}\alpha}\right\} \begin{bmatrix}g(t)\\
+(A_{t}-p_{t})f(t)
+\end{bmatrix}=0,
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $g(t)$
+\end_inset
+
+ is a 
+\begin_inset Formula $q$
+\end_inset
+
+-dimensional feature vector of 
+\begin_inset Formula $t$
+\end_inset
+
+ such that 
+\begin_inset Formula $p_{t}f(t)$
+\end_inset
+
+ is in the linear span of 
+\begin_inset Formula $g(t)$
+\end_inset
+
+.
+ So we have 
+\begin_inset Formula $\dim(\alpha)=q$
+\end_inset
+
+, 
+\begin_inset Formula $\dim(\beta)=p$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Define 
+\begin_inset Formula $D=\begin{bmatrix}D_{1}^{T}\\
+D_{2}^{T}\\
+\vdots\\
+D_{T}^{T}
+\end{bmatrix}$
+\end_inset
+
+ a 
+\begin_inset Formula $T\times(p+q)$
+\end_inset
+
+ matrix, where 
+\begin_inset Formula $D_{t}=\begin{bmatrix}g(t)\\
+(A_{t}-p_{t})f(t)
+\end{bmatrix}$
+\end_inset
+
+ is 
+\begin_inset Formula $(p+q)\times1$
+\end_inset
+
+.
+ Define 
+\begin_inset Formula $r(\alpha,\beta)=(r_{1},\ldots,r_{T})^{T}$
+\end_inset
+
+ a 
+\begin_inset Formula $T\times1$
+\end_inset
+
+ (column) vector, where 
+\begin_inset Formula $r_{t}(\alpha,\beta)=e^{-(A_{t}-p_{t})f(t)^{T}\beta}Y_{t+1}-e^{g(t)^{T}\alpha}$
+\end_inset
+
+.
+ Let 
+\begin_inset Formula $I$
+\end_inset
+
+ be the diagonal matrices with the 
+\begin_inset Formula $t$
+\end_inset
+
+-th diagonal entry being 
+\begin_inset Formula $I_{t}$
+\end_inset
+
+.
+ The above estimating equation can be rewritten as 
+\begin_inset Formula $\mathbb{P}_{n}D^{T}Ir(\alpha,\beta)=0$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Notation convention: For a column vector 
+\begin_inset Formula $f=(f_{1},\ldots,f_{k})^{T}$
+\end_inset
+
+, its derivative is defined as
+\begin_inset Formula 
+\[
+\frac{\partial f}{\partial\theta^{T}}=\begin{bmatrix}\frac{\partial f_{1}}{\partial\theta_{1}} & \cdots & \frac{\partial f_{1}}{\partial\theta_{k}}\\
+\vdots &  & \vdots\\
+\frac{\partial f_{k}}{\partial\theta_{1}} & \cdots & \frac{\partial f_{k}}{\partial\theta_{k}}
+\end{bmatrix},
+\]
+
+\end_inset
+
+and for a scalar 
+\begin_inset Formula $r$
+\end_inset
+
+, its derivative is defined as 
+\begin_inset Formula $\frac{\partial r}{\partial\theta}=(\frac{\partial r}{\partial\theta_{1}},\ldots,\frac{\partial r}{\partial\theta_{k}})^{T}$
+\end_inset
+
+ (column vector), and 
+\begin_inset Formula $\frac{\partial r}{\partial\theta^{T}}=(\frac{\partial r}{\partial\theta_{1}},\ldots,\frac{\partial r}{\partial\theta_{k}})$
+\end_inset
+
+ (row vector).
+\end_layout
+
+\begin_layout Section
+Asymptotic variance
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\theta:=(\alpha,\beta)$
+\end_inset
+
+.
+ Suppose 
+\begin_inset Formula $(\alpha^{*},\beta^{*})$
+\end_inset
+
+ satisfies the population version of the estimating equation, i.e., 
+\begin_inset Formula $E_{\text{truth}}\{D^{T}Ir(\alpha^{*},\beta^{*})\}=0$
+\end_inset
+
+ (
+\begin_inset Formula $\beta^{*}$
+\end_inset
+
+is the 
+\begin_inset Formula $\beta^{*}$
+\end_inset
+
+ in 
+\begin_inset Formula $\text{MEE}(t)$
+\end_inset
+
+, which is shown in Sec 1.2).
+ Then by Theorem 5.21 in vdV, under regularity conditions we have
+\begin_inset Formula 
+\begin{equation}
+\sqrt{n}\left(\begin{bmatrix}\hat{\alpha}\\
+\hat{\beta}
+\end{bmatrix}-\begin{bmatrix}\alpha^{*}\\
+\beta^{*}
+\end{bmatrix}\right)=-V_{\theta^{*}}^{-1}\frac{1}{\sqrt{n}}\sum_{i=1}^{n}\psi_{\theta^{*}}(\text{Data}_{i})+o_{P}(1),\label{eq:vdV}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\theta^{*}=(\alpha^{*},\beta^{*})$
+\end_inset
+
+, 
+\begin_inset Formula $\psi_{\theta}=D^{T}Ir(\alpha,\beta)$
+\end_inset
+
+, 
+\begin_inset Formula $V_{\theta^{*}}=E_{\text{truth}}\left(\frac{\partial\psi_{\theta}}{\partial\theta^{T}}\mid_{\theta^{*}}\right)$
+\end_inset
+
+.
+ This implies that the asymptotic variance of 
+\begin_inset Formula $(\hat{\alpha},\hat{\beta})$
+\end_inset
+
+ is
+\begin_inset Formula 
+\begin{align*}
+\text{Var}\left(\begin{bmatrix}\hat{\alpha}\\
+\hat{\beta}
+\end{bmatrix}\right) & \approx\frac{1}{n}V_{\theta^{*}}^{-1}E_{\text{truth}}(\psi_{\theta^{*}}\psi_{\theta^{*}}^{T})(V_{\theta^{*}}^{-1})^{T}.\\
+ & =\frac{1}{n}V_{\theta^{*}}^{-1}E_{\text{truth}}\{D^{T}Ir(\alpha^{*},\beta^{*})r(\alpha^{*},\beta^{*})^{T}ID\}(V_{\theta^{*}}^{-1})^{T}\\
+ & =\frac{1}{n}M^{-1}\Sigma(M^{-1})^{T},
+\end{align*}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\begin{align*}
+M & =V_{\theta^{*}},\\
+\Sigma & =E_{\text{truth}}\{D^{T}Ir(\alpha^{*},\beta^{*})r(\alpha^{*},\beta^{*})^{T}ID\}.
+\end{align*}
+
+\end_inset
+
+An estimator of the 
+\series bold
+asymptotic variance
+\series default
+ is 
+\begin_inset Formula $\frac{1}{n}M_{n}^{-1}\Sigma_{n}(M_{n}^{-1})^{T}$
+\end_inset
+
+, where 
+\begin_inset Formula 
+\begin{align*}
+\Sigma_{n} & =\mathbb{P}_{n}\{D^{T}Ir(\hat{\theta})r(\hat{\theta})^{T}ID\},\\
+M_{n} & =\mathbb{P}_{n}D^{T}I\frac{\partial r(\hat{\theta})}{\partial\theta^{T}}.
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Small sample correction with hat matrix
+\end_layout
+
+\begin_layout Standard
+For small sample correction as in Mancl and DeRouen (2001), we replace 
+\begin_inset Formula $\Sigma_{n}$
+\end_inset
+
+ in the variance estimator by 
+\begin_inset Formula $\tilde{\Sigma}_{n}$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\tilde{\Sigma}_{n}=\frac{1}{n}\sum_{i=1}^{n}\left[D_{i}^{T}I_{i}\left\{ Id_{i}-H_{ii}(\hat{\theta})\right\} ^{-1}r_{i}(\hat{\theta})r_{i}(\hat{\theta})^{T}\left\{ Id_{i}-H_{ii}(\hat{\theta})\right\} ^{-1,T}I_{i}D_{i}\right],
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $Id_{i}$
+\end_inset
+
+ is the identity matrix (the same dimension as 
+\begin_inset Formula $H_{ii}(\hat{\theta})$
+\end_inset
+
+), and
+\begin_inset Formula 
+\[
+H_{ii}(\theta)=\frac{1}{n}\frac{\partial r_{i}(\theta)}{\partial\theta^{T}}M_{n}^{-1}D_{i}^{T}.
+\]
+
+\end_inset
+
+Derivation of this small sample correction formula is in Section 5 of 
+\begin_inset Quotes eld
+\end_inset
+
+2019.02.06 - asymptotic variance and small sample correction incorporating
+ availability (new).pdf
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Asymptotic variance and small sample correction, computing out each terms
+ in order to program it in R
+\end_layout
+
+\begin_layout Standard
+Some of the sections are copied from 
+\begin_inset Quotes eld
+\end_inset
+
+2019.12.18 - derivation with only time in covariates.lyx
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Derivative 
+\begin_inset Formula $\frac{\partial r(\theta)}{\partial\theta^{T}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Recall that 
+\begin_inset Formula $r_{t}(\alpha,\beta)=e^{-(A_{t}-p_{t})f(t)^{T}\beta}Y_{t+1}-e^{g(t)^{T}\alpha}$
+\end_inset
+
+.
+ We have 
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial r_{t}}{\partial\theta^{T}} & =\left[\frac{\partial r_{t}}{\partial\alpha^{T}},\frac{\partial r_{t}}{\partial\beta^{T}}\right]\\
+ & =\left[-e^{g(t)^{T}\alpha}g(t)^{T},-e^{-(A_{t}-p_{t})f(t)^{T}\beta}Y_{t+1}(A_{t}-p_{t})f(t)^{T}\right].
+\end{align*}
+
+\end_inset
+
+So
+\begin_inset Formula 
+\[
+\frac{\partial r(\theta)}{\partial\theta^{T}}=\begin{bmatrix}-e^{g(1)^{T}\alpha}g(1)^{T} & -e^{-(A_{1}-p_{1})f(1)^{T}\beta}Y_{2}(A_{1}-p_{1})f(1)^{T}\\
+\vdots & \vdots\\
+-e^{g(T)^{T}\alpha}g(T)^{T} & -e^{-(A_{T}-p_{T})f(T)^{T}\beta}Y_{T+1}(A_{T}-p_{T})f(T)^{T}
+\end{bmatrix}.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Analytic calculation of 
+\begin_inset Formula $M_{n}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We have
+\begin_inset Formula 
+\begin{align*}
+M_{n} & =\mathbb{P}_{n}D^{T}I\frac{\partial r(\hat{\theta})}{\partial\theta^{T}}.\\
+ & =\mathbb{P}_{n}\begin{bmatrix}g(1) & \cdots & g(T)\\
+(A_{1}-p_{1})f(1) & \cdots & (A_{T}-p_{T})f(T)
+\end{bmatrix}_{(q+p)\times T}\begin{bmatrix}I_{1} & 0 & 0\\
+0 & \cdots & 0\\
+0 & 0 & I_{T}
+\end{bmatrix}_{T\times T}\\
+ & \times\begin{bmatrix}-e^{g(1)^{T}\hat{\alpha}}g(1)^{T} & -e^{-(A_{1}-p_{1})f(1)^{T}\hat{\beta}}Y_{2}(A_{1}-p_{1})f(1)^{T}\\
+\vdots & \vdots\\
+-e^{g(T)^{T}\hat{\alpha}}g(T)^{T} & -e^{-(A_{T}-p_{T})f(T)^{T}\hat{\beta}}Y_{T+1}(A_{T}-p_{T})f(T)^{T}
+\end{bmatrix}_{T\times(q+p)}\\
+ & =\mathbb{P}_{n}\sum_{t=1}^{T}I_{t}\begin{bmatrix}g(t)\\
+(A_{t}-p_{t})f(t)
+\end{bmatrix}\left[-e^{g(t)^{T}\hat{\alpha}}g(t)^{T},-e^{-(A_{t}-p_{t})f(t)^{T}\hat{\beta}}Y_{t+1}(A_{t}-p_{t})f(t)^{T}\right]\\
+ & =-\mathbb{P}_{n}\sum_{t=1}^{T}I_{t}\begin{bmatrix}e^{g(t)^{T}\hat{\alpha}}g(t)g(t)^{T} & e^{-(A_{t}-p_{t})f(t)^{T}\hat{\beta}}Y_{t+1}(A_{t}-p_{t})g(t)f(t)^{T}\\
+e^{g(t)^{T}\hat{\alpha}}(A_{t}-p_{t})f(t)g(t)^{T} & e^{-(A_{t}-p_{t})f(t)^{T}\hat{\beta}}Y_{t+1}(A_{t}-p_{t})^{2}f(t)f(t)^{T}
+\end{bmatrix}.
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Analytic calculation of 
+\begin_inset Formula $\Sigma_{n}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Sigma_{n} & =\mathbb{P}_{n}\{D^{T}Ir(\hat{\alpha},\hat{\beta})r(\hat{\alpha},\hat{\beta})^{T}ID\}\\
+ & =\mathbb{P}_{n}\left\{ \left(\sum_{t=1}^{T}D_{t}I_{t}r_{t}(\hat{\alpha},\hat{\beta})\right)\left(\sum_{s=1}^{T}D_{s}I_{s}r_{s}(\hat{\alpha},\hat{\beta})\right)^{T}\right\} \\
+ & =\mathbb{P}_{n}\left\{ \sum_{t=1}^{T}\sum_{s=1}^{T}I_{t}I_{s}r_{t}(\hat{\alpha},\hat{\beta})r_{s}(\hat{\alpha},\hat{\beta})D_{t}D_{s}^{T}\right\} \\
+ & =\mathbb{P}_{n}\left\{ \sum_{t=1}^{T}\sum_{s=1}^{T}I_{t}I_{s}r_{t}(\hat{\alpha},\hat{\beta})r_{s}(\hat{\alpha},\hat{\beta})\begin{bmatrix}g(t)g(t)^{T} & (A_{s}-p_{s})g(t)f(s)^{T}\\
+(A_{t}-p_{t})f(t)g(s)^{T} & (A_{t}-p_{t})(A_{s}-p_{s})f(t)f(s)^{T}
+\end{bmatrix}\right\} 
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Analytic calculation of 
+\begin_inset Formula $\tilde{\Sigma}_{n}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We have
+\begin_inset Formula 
+\[
+H_{ii}(\hat{\theta})=\frac{1}{n}\frac{\partial r_{i}(\hat{\theta})}{\partial\theta^{T}}M_{n}^{-1}D_{i}^{T}
+\]
+
+\end_inset
+
+where each term are explicitly written out as above.
+\end_layout
+
+\begin_layout Standard
+Hence, we have
+\begin_inset Formula 
+\[
+\tilde{\Sigma}_{n}=\frac{1}{n}\sum_{i=1}^{n}\left[D_{i}^{T}I_{i}\left\{ Id_{i}-H_{ii}(\hat{\theta})\right\} ^{-1}r_{i}(\hat{\theta})r_{i}(\hat{\theta})^{T}\left\{ Id_{i}-H_{ii}(\hat{\theta})\right\} ^{-1,T}I_{i}D_{i}\right].
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
