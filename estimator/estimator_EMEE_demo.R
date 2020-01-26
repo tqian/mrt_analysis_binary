@@ -2,7 +2,7 @@
 # created by Tianchen Qian on 2019.12.16
 #
 # This code illustrates the usage of estimator_EMEE() function
-# by first creating a data set via dgm_binary_uniform_covariate()
+# by first creating a data set via dgm_demo()
 # then using estimator_EMEE() to estimate the effect moderation
 
 rm(list = ls())
